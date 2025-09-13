@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>거래실적 시각화 보고서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .report-card {
+            background-color: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-10">
+
+<div class="container">
+    <div class="report-card">
+        <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">거래실적 시각화 보고서</h1>
+    </div>
+
+    <!-- 1. 거래처별 총 거래액 및 거래 건수 -->
+    <div class="report-card">
+        <h2 class="section-title">1. 거래처별 총 거래액 및 거래 건수</h2>
+        <div class="table-container mb-8">
+            <table class="w-full text-sm rounded-lg overflow-hidden">
+                <thead>
+                    <tr>
+                        <th>거래처</th>
+                        <th>거래 건수</th>
+                        <th>총 거래액 (원)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>그린푸드</td><td>4</td><td>1,848,603</td></tr>
+                    <tr><td>더블유상회</td><td>3</td><td>1,043,991</td></tr>
+                    <tr><td>한빛상사</td><td>2</td><td>1,338,477</td></tr>
+                    <tr><td>삼정유통</td><td>2</td><td>1,093,062</td></tr>
+                    <tr><td>애드마케트</td><td>3</td><td>1,768,432</td></tr>
+                    <tr><td>동서상사</td><td>2</td><td>1,213,898</td></tr>
+                    <tr><td>예코마케트</td><td>2</td><td>1,213,898</td></tr>
+                    <tr class="font-bold"><td>합계</td><td>20</td><td>10,230,229</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-lg">
+            <h3 class="font-semibold text-lg text-gray-700 mb-4">거래처별 총 거래액</h3>
+            <canvas id="totalAmountChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 2. 거래 형태별 거래실적 -->
+    <div class="report-card">
+        <h2 class="section-title">2. 거래 형태별 거래실적</h2>
+        <div class="table-container mb-8">
+            <table class="w-full text-sm rounded-lg overflow-hidden">
+                <thead>
+                    <tr>
+                        <th>거래처</th>
+                        <th>매입 건수</th>
+                        <th>매입액 (원)</th>
+                        <th>매출 건수</th>
+                        <th>매출액 (원)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>그린푸드</td><td>2</td><td>523,982</td><td>2</td><td>1,324,621</td></tr>
+                    <tr><td>더블유상회</td><td>1</td><td>395,610</td><td>2</td><td>648,381</td></tr>
+                    <tr><td>한빛상사</td><td>1</td><td>709,784</td><td>1</td><td>622,010</td></tr>
+                    <tr><td>삼정유통</td><td>1</td><td>546,482</td><td>1</td><td>546,580</td></tr>
+                    <tr><td>애드마케트</td><td>1</td><td>380,567</td><td>2</td><td>1,387,865</td></tr>
+                    <tr><td>동서상사</td><td>1</td><td>496,822</td><td>1</td><td>741,276</td></tr>
+                    <tr><td>예코마케트</td><td>2</td><td>1,003,983</td><td>0</td><td>0</td></tr>
+                    <tr class="font-bold"><td>합계</td><td>9</td><td>4,896,229</td><td>11</td><td>5,334,000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-lg">
+            <h3 class="font-semibold text-lg text-gray-700 mb-4">거래 형태별 실적</h3>
+            <canvas id="typeChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 3. 거래 품목 및 주요 거래내역 -->
+    <div class="report-card">
+        <h2 class="section-title">3. 거래 품목별 거래 실적</h2>
+        <p class="text-sm text-gray-600 mb-6">주요 거래 품목의 총 거래액 비중을 나타냅니다.</p>
+        <div class="bg-gray-50 p-6 rounded-lg flex justify-center items-center h-96">
+            <canvas id="itemChart" class="max-h-80"></canvas>
+        </div>
+        <div class="mt-8 text-sm text-gray-700">
+            <ul class="list-disc list-inside space-y-2">
+                <li>**그린푸드:** '몽블랑 가죽지갑' (매출)과 'CJ 햇반' (매입)을 주로 거래했습니다. 총 거래액 중 '몽블랑 가죽지갑'의 비중이 높습니다.</li>
+                <li>**더블유상회:** 'CJ 햇반' (매입)과 '스타벅스 머그컵' (매출) 거래가 있었습니다.</li>
+                <li>**한빛상사:** '사프란 섬유유연제'를 매입하고 '몽블랑 가죽지갑'을 매출했습니다.</li>
+                <li>**삼정유통:** '롯데 과자세트' (매입 및 매출) 거래가 있었습니다.</li>
+                <li>**애드마케트:** '스타벅스 머그컵' (매입 및 매출)을 주로 거래했습니다.</li>
+                <li>**동서상사:** '코카콜라 500ml 페트병' (매입 및 매출)을 거래했습니다.</li>
+                <li>**예코마케트:** '사프란 섬유유연제'를 매입했으나 매출은 없었습니다.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="text-right text-gray-500 text-sm mt-8">
+        <p>보고서 작성자: 경리전문가 시스템</p>
+        <p>작성일: 2025년 9월 13일</p>
+    </div>
+</div>
+
+<script>
+    // 1. 거래처별 총 거래액 차트
+    const totalAmountCtx = document.getElementById('totalAmountChart').getContext('2d');
+    const totalAmountData = {
+        labels: ['그린푸드', '더블유상회', '한빛상사', '삼정유통', '애드마케트', '동서상사', '예코마케트'],
+        datasets: [{
+            label: '총 거래액 (원)',
+            data: [1848603, 1043991, 1338477, 1093062, 1768432, 1213898, 1213898],
+            backgroundColor: [
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(201, 203, 207, 0.6)'
+            ],
+            borderColor: [
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(201, 203, 207, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+    new Chart(totalAmountCtx, {
+        type: 'bar',
+        data: totalAmountData,
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '총 거래액 (원)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // 2. 거래 형태별 거래실적 차트
+    const typeChartCtx = document.getElementById('typeChart').getContext('2d');
+    const typeChartData = {
+        labels: ['그린푸드', '더블유상회', '한빛상사', '삼정유통', '애드마케트', '동서상사', '예코마케트'],
+        datasets: [{
+            label: '매입액 (원)',
+            data: [523982, 395610, 709784, 546482, 380567, 496822, 1003983],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }, {
+            label: '매출액 (원)',
+            data: [1324621, 648381, 622010, 546580, 1387865, 741276, 0],
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+        }]
+    };
+    new Chart(typeChartCtx, {
+        type: 'bar',
+        data: typeChartData,
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    stacked: false,
+                },
+                y: {
+                    stacked: false,
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // 3. 거래 품목별 거래 실적 차트
+    const itemChartCtx = document.getElementById('itemChart').getContext('2d');
+    const itemData = {
+        '몽블랑 가죽지갑': 1324621 + 622010,
+        'CJ 햇반': 395610 + 140975,
+        '스타벅스 머그컵': 380567 + 440136,
+        '사프란 섬유유연제': 709784 + 821987 + 987928,
+        '코카콜라 500ml 페트병': 496822 + 741276,
+        '롯데 과자세트': 148231 + 297826 + 433076,
+        '농심 신라면': 671470
+    };
+
+    const itemChartData = {
+        labels: Object.keys(itemData),
+        datasets: [{
+            label: '거래액 (원)',
+            data: Object.values(itemData),
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED'
+            ],
+            hoverBackgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED'
+            ]
+        }]
+    };
+
+    new Chart(itemChartCtx, {
+        type: 'pie',
+        data: itemChartData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            let label = tooltipItem.label || '';
+                            let value = tooltipItem.raw;
+                            return `${label}: ${value.toLocaleString()}원`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
